@@ -23,9 +23,9 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet("getbyid")]
-        public IActionResult Get()
+        public IActionResult Get(int id)
         {
-            int id = 0;
+
             var result = carService.GetById(id);
             if (result.Success)
             {
@@ -34,9 +34,9 @@ namespace WebAPI.Controllers
             }
             return BadRequest(result);
         }
-            [HttpGet("getall")]
-            public IActionResult GetAll()
-            {
+        [HttpGet("getall")]
+        public IActionResult GetAll()
+        {
 
             var result = carService.GetAll();
             if (result.Success)
@@ -49,7 +49,7 @@ namespace WebAPI.Controllers
         }
         [HttpPost("add")]
 
-        public IActionResult Add(Car car )
+        public IActionResult Add(Car car)
         {
 
             var result = carService.Add(car);

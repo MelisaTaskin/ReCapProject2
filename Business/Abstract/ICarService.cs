@@ -22,6 +22,6 @@ namespace Business.Abstract
 
         IDataResult<Car> GetByDescription(string description);
         IDataResult<List<CarDetailDto>> GetCarDetails();
-        object GetById(object id);
+        
     }
 }
