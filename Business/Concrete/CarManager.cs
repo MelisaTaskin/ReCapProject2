@@ -1,8 +1,10 @@
 ﻿using Business.Abstract;
+using Business.CCS;
 using Business.Constans;
 using Business.ValidationRules.FluentValidation;
 using Core.Aspects.Autofac.Validation;
 using Core.CrossCuttingConcerns.Validation;
+using Core.Utilities.Business;
 using Core.Utilities.Results;
 using DataAccess.Abstract;
 using Entities.Concrete;
@@ -10,6 +12,7 @@ using Entities.DTOs;
 using FluentValidation;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Business.Concrete
@@ -17,21 +20,36 @@ namespace Business.Concrete
     public class CarManager : ICarService
     {
         ICarDal _carDal;
-        
-        public CarManager(ICarDal carDal)
+        IBrandService _brandService;
+
+
+        public CarManager(ICarDal carDal,IBrandService brandService)
         {
             _carDal = carDal;
+            _brandService = brandService;
         }
+
         [ValidationAspect(typeof(CarValidator))]
         public IResult Add(Car car)
         {
-            //validation(doğrulama)
+            //bir markadan en fazla 10 araba olabilir
 
-            
-           
+            //aynı renkte  ürün eklenemez 
+
+            //business codes
+           IResult result = BusinessRules.Run(CheckIfCarOfColorExists(car.ColorId),
+                CheckIfCarCountOfBrandCorrect(car.BrandId));
+            if (result  != null)
+            {
+                return result;
+            }
 
             _carDal.Add(car);
             return new SuccessResult(Messages.CarAdded);
+
+            
+
+
 
         }
 
@@ -72,5 +90,31 @@ namespace Business.Concrete
             return new SuccessResult(Messages.CarAdded);
             //_carDal.Update(car);
         }
+
+
+        private IResult CheckIfCarCountOfBrandCorrect(int brandId)
+        {
+            var result = _carDal.GetAll(c => c.BrandId == brandId).Count;
+            if (result >= 10)
+            {
+                return new ErrorResult(Messages.CarCountOfBrandError);
+            }
+            return new SuccessResult();
+
+        }
+        private IResult CheckIfCarOfColorExists(int colorId)
+        {
+            var result = _carDal.GetAll(c => c.ColorId == colorId).Any();
+            if (result==true)
+            {
+                return new ErrorResult(Messages.ColorIdAlreadyExists);
+            }
+            return new SuccessResult();
+        }
     }
+
+
+
+
+
 }
